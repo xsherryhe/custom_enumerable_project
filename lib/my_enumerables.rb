@@ -45,7 +45,7 @@ module Enumerable
   def my_inject(*start)
     raise "Too many arguments" unless start.size < 2
     enum_arr = self.to_a
-    acum, *inject_arr = start.empty? ? enum_arr : start.concat(enum_arr)
+    acum, *inject_arr = start.empty? ? enum_arr : start + enum_arr
     inject_arr.my_each { |elem| acum = yield(acum, elem) }
     acum
   end
@@ -64,3 +64,9 @@ class Array
     self
   end
 end
+
+def multiply_els(arr)
+  arr.my_inject { |product, elem| product * elem }
+end
+
+puts multiply_els([2, 4, 5])
