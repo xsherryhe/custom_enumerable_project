@@ -27,6 +27,28 @@ module Enumerable
     my_each { |elem| return false if yield(elem) }
     true
   end
+
+  def my_count(*val, &block)
+    raise "Too many arguments" unless val.size < 2
+    block = ->(elem){ elem == val[0] } unless val.empty?
+    count = 0
+    my_each { |elem| count += 1 if (block_given? ? block.call(elem) : true) }
+    count
+  end
+
+  def my_map
+    new_arr = []
+    my_each { |elem| new_arr << yield(elem) }
+    new_arr
+  end
+
+  def my_inject(*start)
+    raise "Too many arguments" unless start.size < 2
+    enum_arr = self.to_a
+    acum, *inject_arr = start.empty? ? enum_arr : start.concat(enum_arr)
+    inject_arr.my_each { |elem| acum = yield(acum, elem) }
+    acum
+  end
 end
 
 # You will first have to define my_each
