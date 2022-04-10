@@ -36,9 +36,11 @@ module Enumerable
     count
   end
 
-  def my_map
+  def my_map(proc = nil, &func)
+    func = proc if proc.class == Proc
+    raise "Missing Proc object or block argument" unless func && func.respond_to?(:call)
     new_arr = []
-    my_each { |elem| new_arr << yield(elem) }
+    my_each { |elem| new_arr << func.call(elem) }
     new_arr
   end
 
