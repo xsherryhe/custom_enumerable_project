@@ -29,26 +29,31 @@ module Enumerable
   end
 
   def my_count(*val, &block)
-    raise "Too many arguments" unless val.size < 2
-    block = ->(elem){ elem == val[0] } unless val.empty?
+    raise 'Too many arguments' unless val.size < 2
+
+    block = ->(elem) { elem == val[0] } unless val.empty?
     count = 0
-    my_each { |elem| count += 1 if (block_given? ? block.call(elem) : true) }
+    my_each { |elem| count += 1 if block_given? ? block.call(elem) : true }
     count
   end
 
   def my_map(proc = nil, &func)
-    func = proc if proc.class == Proc
-    raise "Missing Proc object or block argument" unless func && func.respond_to?(:call)
+    func = proc if proc.is_a?(Proc)
+    raise 'Missing Proc object or block argument' unless func.respond_to?(:call)
+
     new_arr = []
     my_each { |elem| new_arr << func.call(elem) }
     new_arr
   end
 
-  def my_inject(*start)
-    raise "Too many arguments" unless start.size < 2
-    enum_arr = self.to_a
-    acum, *inject_arr = start.empty? ? enum_arr : start + enum_arr
-    inject_arr.my_each { |elem| acum = yield(acum, elem) }
+  def my_inject(*start, &func)
+    raise 'Too many arguments' unless start.size < 2
+
+    symbol_arg = start[0].is_a?(Symbol)
+    func = proc { |acum, elem| acum.send(start[0], elem) } if symbol_arg
+    enum_arr = to_a
+    acum, *inject_arr = start.empty? || symbol_arg ? enum_arr : start + enum_arr
+    inject_arr.my_each { |elem| acum = func.call(acum, elem) }
     acum
   end
 end
@@ -60,7 +65,7 @@ end
 class Array
   # Define my_each here
   def my_each
-    for i in 0...self.size
+    for i in 0...size
       yield(self[i])
     end
     self
